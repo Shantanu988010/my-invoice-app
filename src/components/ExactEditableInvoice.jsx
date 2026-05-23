@@ -73,15 +73,24 @@ const ExactEditableInvoice = () => {
 
   const downloadPDF = () => {
     const input = invoiceRef.current;
-    html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
+    
+    // 1. Lower scale to 1.5 (keeps it sharp but drastically reduces size)
+    html2canvas(input, { 
+      scale: 1.5, 
+      useCORS: true,
+      logging: false,
+    }).then((canvas) => {
+      // 2. Use JPEG with 0.7 quality (compresses the image data)
+      const imgData = canvas.toDataURL('image/jpeg', 0.7); 
+      
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const imgProps = pdf.getImageProperties(imgData);
+      const scaledHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      // 3. Add to PDF with 'FAST' compression enabled
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, scaledHeight, undefined, 'FAST');
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
-      // Dynamic filename based on the customer's name
       const safeFilename = invoiceData.to.replace(/[^a-zA-Z0-9]/g, '_');
       pdf.save(`${safeFilename}_Invoice.pdf`);
     });
