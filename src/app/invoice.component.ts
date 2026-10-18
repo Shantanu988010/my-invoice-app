@@ -1,0 +1,144 @@
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+
+interface InvoiceItem {
+  particulate: string;
+  size: string;
+  sqFt: string;
+  totalSqFt: number | string;
+  rate: number | string;
+}
+
+@Component({
+  selector: 'app-invoice',
+  standalone: true,
+  imports: [FormsModule, DecimalPipe],
+  template: `
+    <div class="workspace" [class.mobile]="isMobile">
+      <section class="editor">
+        <h2>Edit Invoice Variables</h2>
+        <div class="field"><label for="billed-to">Billed To</label><input id="billed-to" [(ngModel)]="invoice.to"></div>
+        <div class="field"><label for="subject">Subject</label><input id="subject" [(ngModel)]="invoice.subject"></div>
+        <div class="field"><label for="description">Description</label><textarea id="description" rows="3" [(ngModel)]="invoice.description"></textarea></div>
+        <hr>
+        <h3>Item Details</h3>
+        @for (item of invoice.items; track $index; let i = $index) {
+          <article class="item-card">
+            @if (invoice.items.length > 1) { <button class="remove" (click)="removeItem(i)">× Remove</button> }
+            <div class="field"><label [for]="'particulate-' + i">Particulate Name</label><input [id]="'particulate-' + i" [(ngModel)]="item.particulate"></div>
+            <div class="field-row">
+              <div class="field"><label [for]="'size-' + i">Size (Text)</label><input [id]="'size-' + i" [(ngModel)]="item.size"></div>
+              <div class="field"><label [for]="'sqft-' + i">Sq/Ft (Text)</label><input [id]="'sqft-' + i" [(ngModel)]="item.sqFt"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label [for]="'total-' + i">Total Sq/Ft (Number)</label><input [id]="'total-' + i" type="number" [(ngModel)]="item.totalSqFt"></div>
+              <div class="field"><label [for]="'rate-' + i">Rate</label><input [id]="'rate-' + i" type="number" [(ngModel)]="item.rate"></div>
+            </div>
+          </article>
+        }
+        <button class="add-button" (click)="addItem()">+ Add Another Item</button>
+        <div class="field"><label for="gst">GST Percentage (%)</label><input id="gst" type="number" [(ngModel)]="invoice.gstRate"></div>
+        <div class="field"><label for="terms">Terms &amp; Conditions (One per line)</label><textarea id="terms" rows="5" [(ngModel)]="invoice.terms"></textarea></div>
+        <div class="field"><label for="signoff">Signoff Name</label><input id="signoff" [(ngModel)]="invoice.signoff"></div>
+        @if (!isMobile) { <button class="download" (click)="downloadPdf()">Download as PDF</button> }
+      </section>
+      <section class="preview-area">
+        @if (isMobile) { <button class="download mobile-download" (click)="downloadPdf()">Download as PDF</button> }
+        <article class="invoice-paper" #invoicePaper>
+          <div class="banner"><img src="/logo-sg.png" alt="Shantanu Glass Banner"></div>
+          <div class="invoice-meta">
+            <div><strong>To.</strong> {{ invoice.to }}</div>
+            <div><strong>Sub:</strong> {{ invoice.subject }}</div>
+            <div><strong>Description:</strong> {{ invoice.description }}</div>
+          </div>
+          <table class="line-items">
+            <thead><tr><th>Particulates</th><th>Size</th><th>Sq/Ft</th><th>Total Sq/Ft</th><th>Rate</th><th>Amount</th></tr></thead>
+            <tbody>
+              @for (item of invoice.items; track $index) {
+                <tr><td>{{ item.particulate }}</td><td>{{ item.size }}</td><td>{{ item.sqFt }}</td><td>{{ item.totalSqFt }}</td><td>{{ item.rate }}</td><td>{{ amount(item) | number:'1.0-0':'en-IN' }}</td></tr>
+              }
+            </tbody>
+          </table>
+          <div class="summary">
+            <div class="terms"><strong>Terms &amp; Conditions</strong>
+              @for (line of invoice.terms.split('\n'); track $index) { <div>{{ line }}</div> }
+            </div>
+            <table class="totals"><tbody>
+              <tr><td>Total</td><td>{{ subtotal | number:'1.0-0':'en-IN' }}</td></tr>
+              <tr><td>GST {{ invoice.gstRate }}%</td><td>{{ gst | number:'1.0-0':'en-IN' }}</td></tr>
+              <tr><td><strong>Total Amount</strong></td><td><strong>{{ grandTotal | number:'1.0-0':'en-IN' }}</strong></td></tr>
+            </tbody></table>
+          </div>
+          <div class="signoff"><p>Thanks</p><p>{{ invoice.signoff }}</p></div>
+        </article>
+      </section>
+    </div>
+  `,
+  styles: [`
+    :host { display: block; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .workspace { display: flex; min-height: calc(100vh - 50px); height: calc(100vh - 50px); background: #e2e8f0; }
+    .editor { flex: 0 0 450px; padding: 20px; background: white; overflow-y: auto; box-sizing: border-box; border-right: 1px solid #ccc; box-shadow: 2px 0 5px #0002; }
+    h2 { margin: 0 0 20px; font-size: 20px; } h3 { margin: 0 0 10px; font-size: 16px; }
+    .field { flex: 1; min-width: 0; margin-bottom: 12px; }
+    label { display: block; margin-bottom: 5px; color: #334155; font-size: 13px; font-weight: 700; }
+    input, textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font: inherit; font-size: 14px; }
+    textarea { resize: vertical; } hr { margin: 20px 0; border: 0; border-top: 1px solid #cbd5e1; }
+    .item-card { position: relative; margin-bottom: 15px; padding: 15px; border: 1px solid #cbd5e1; border-radius: 5px; background: #f8fafc; }
+    .field-row { display: flex; gap: 10px; } .remove { float: right; padding: 4px 8px; background: #ef4444; color: white; font-size: 12px; }
+    .add-button, .download { width: 100%; padding: 12px; border: 0; border-radius: 5px; color: white; cursor: pointer; font: inherit; font-weight: 700; }
+    .add-button { margin-bottom: 20px; background: #3b82f6; } .download { margin-top: 10px; padding: 15px; background: #0f172a; font-size: 16px; }
+    .preview-area { flex: 1; overflow: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+    .invoice-paper { flex: none; width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white; color: black; box-shadow: 0 10px 15px #0002; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .banner { margin-bottom: 20px; } .banner img { display: block; width: 100%; height: auto; }
+    .invoice-meta { margin-bottom: 25px; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+    table { border-collapse: collapse; } .line-items { width: 100%; margin-bottom: 30px; font-size: 14px; }
+    th, td { border: 1px solid black; padding: 10px; } th { text-align: center; } th:first-child, td:first-child { text-align: left; } th:last-child, td:last-child { text-align: right; }
+    .summary { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .terms { width: 55%; font-size: 14px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; } .terms strong { display: block; margin-bottom: 10px; text-decoration: underline; }
+    .totals { width: 40%; font-size: 14px; } .totals td { text-align: right; } .totals td:first-child { font-weight: 700; }
+    .signoff { margin-top: 70px; text-align: right; font-size: 15px; font-weight: 700; } .signoff p:first-child { margin: 0 0 50px; } .signoff p:last-child { margin: 0; }
+    .mobile-download { display: none; }
+    .mobile { height: auto; min-height: calc(100vh - 50px); flex-direction: column; }
+    .mobile .editor { flex: none; width: 100%; padding: 15px; overflow: visible; border-right: 0; border-bottom: 2px solid #94a3b8; box-shadow: none; }
+    .mobile .field-row { flex-direction: column; gap: 0; }
+    .mobile .preview-area { width: 100%; padding: 10px; align-items: flex-start; overflow: auto; }
+    .mobile-download { display: block; position: sticky; top: 0; z-index: 2; width: calc(100vw - 20px); margin: 0 0 20px; box-shadow: 0 4px 6px #0002; }
+    @media (max-width: 520px) { .invoice-paper { transform-origin: top left; } }
+  `],
+})
+export class InvoiceComponent {
+  @ViewChild('invoicePaper') invoicePaper!: ElementRef<HTMLElement>;
+  isMobile = window.innerWidth <= 768;
+  invoice = {
+    to: 'FSE Solutions Pvt Ltd,', subject: '1inch Series Double Door',
+    description: '1 inch Series Handle, Middle With Double Door White Colour Composite Panel with Fitting with Hinges',
+    items: [{ particulate: 'Double Door', size: '102 1/2 * 7', sqFt: '73.5', totalSqFt: 73.5, rate: 185 }] as InvoiceItem[],
+    gstRate: 18, terms: '1. 60% Advance Payment Applicable\n2. 20% After Glass Work\n3. 15% After Celling Work\n4. 5% After Complete Work',
+    signoff: 'Shantanu Glass and Aluminum',
+  };
+
+  @HostListener('window:resize') onResize(): void { this.isMobile = window.innerWidth <= 768; }
+
+  amount(item: InvoiceItem): number { return (Number(item.totalSqFt) || 0) * (Number(item.rate) || 0); }
+  get subtotal(): number { return this.invoice.items.reduce((sum, item) => sum + this.amount(item), 0); }
+  get gst(): number { return Math.round(this.subtotal * (Number(this.invoice.gstRate) / 100 || 0)); }
+  get grandTotal(): number { return Math.round(this.subtotal + this.gst); }
+
+  addItem(): void { this.invoice.items.push({ particulate: '', size: '', sqFt: '', totalSqFt: '', rate: '' }); }
+  removeItem(index: number): void { this.invoice.items.splice(index, 1); }
+
+  async downloadPdf(): Promise<void> {
+    const canvas = await html2canvas(this.invoicePaper.nativeElement, { scale: 1.5, useCORS: true, logging: false });
+    const image = canvas.toDataURL('image/jpeg', 0.7);
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const width = pdf.internal.pageSize.getWidth();
+    const properties = pdf.getImageProperties(image);
+    const height = (properties.height * width) / properties.width;
+    pdf.addImage(image, 'JPEG', 0, 0, width, height, undefined, 'FAST');
+    const filename = this.invoice.to.replace(/[^a-zA-Z0-9]/g, '_');
+    pdf.save(`${filename}_Invoice.pdf`);
+  }
+}
