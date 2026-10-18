@@ -78,31 +78,32 @@ interface InvoiceItem {
     </div>
   `,
   styles: [`
-    :host { display: block; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
-    .workspace { display: flex; min-height: calc(100vh - 50px); height: calc(100vh - 50px); background: #e2e8f0; }
-    .editor { flex: 0 0 450px; padding: 20px; background: white; overflow-y: auto; box-sizing: border-box; border-right: 1px solid #ccc; box-shadow: 2px 0 5px #0002; }
-    h2 { margin: 0 0 20px; font-size: 20px; } h3 { margin: 0 0 10px; font-size: 16px; }
+    :host { display: block; font-family: var(--font-system); }
+    .workspace { display: flex; min-height: calc(100vh - 82px); height: calc(100vh - 82px); background: #edf3f1; }
+    .editor { flex: 0 0 450px; padding: 24px; background: #fff; overflow-y: auto; box-sizing: border-box; border-right: 1px solid #dfe8e5; box-shadow: 5px 0 20px #1c3c3b0a; }
+    h2 { margin: 0 0 20px; color: #203b40; font-size: 22px; } h3 { margin: 0 0 10px; color: #2a4147; font-size: 18px; }
     .field { flex: 1; min-width: 0; margin-bottom: 12px; }
-    label { display: block; margin-bottom: 5px; color: #334155; font-size: 13px; font-weight: 700; }
-    input, textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font: inherit; font-size: 14px; }
+    label { display: block; margin-bottom: 6px; color: #334155; font-size: 14px; font-weight: 700; }
+    input, textarea { width: 100%; padding: 10px 11px; border: 1px solid #d4dfdd; border-radius: 6px; box-sizing: border-box; font: inherit; font-size: 15px; transition: border-color .15s, box-shadow .15s; }
+    input:focus, textarea:focus { outline: none; border-color: #559890; box-shadow: 0 0 0 3px #55989020; }
     textarea { resize: vertical; } hr { margin: 20px 0; border: 0; border-top: 1px solid #cbd5e1; }
-    .item-card { position: relative; margin-bottom: 15px; padding: 15px; border: 1px solid #cbd5e1; border-radius: 5px; background: #f8fafc; }
-    .field-row { display: flex; gap: 10px; } .remove { float: right; padding: 4px 8px; background: #ef4444; color: white; font-size: 12px; }
+    .item-card { position: relative; margin-bottom: 15px; padding: 15px; border: 1px solid #dce7e4; border-radius: 8px; background: #f7faf9; }
+    .field-row { display: flex; gap: 10px; } .remove { float: right; padding: 5px 9px; background: #ef4444; color: white; font-size: 13px; }
     .add-button, .download { width: 100%; padding: 12px; border: 0; border-radius: 5px; color: white; cursor: pointer; font: inherit; font-weight: 700; }
-    .add-button { margin-bottom: 20px; background: #3b82f6; } .download { margin-top: 10px; padding: 15px; background: #0f172a; font-size: 16px; }
-    .preview-area { flex: 1; overflow: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
-    .invoice-paper { flex: none; width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white; color: black; box-shadow: 0 10px 15px #0002; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .add-button { margin-bottom: 20px; background: #4b9189; } .add-button:hover { background: #397c75; } .download { margin-top: 10px; padding: 15px; background: #173f45; font-size: 16px; }
+    .preview-area { flex: 1; overflow: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; background: #edf3f1; }
+    .invoice-paper { flex: none; width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white; color: black; box-shadow: 0 10px 15px #0002; font-family: var(--font-system); }
     .banner { margin-bottom: 20px; } .banner img { display: block; width: 100%; height: auto; }
-    .invoice-meta { margin-bottom: 25px; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
-    table { border-collapse: collapse; } .line-items { width: 100%; margin-bottom: 30px; font-size: 14px; }
+    .invoice-meta { margin-bottom: 25px; font-size: 16px; line-height: 1.65; overflow-wrap: anywhere; }
+    table { border-collapse: collapse; } .line-items { width: 100%; margin-bottom: 30px; font-size: 15px; }
     th, td { border: 1px solid black; padding: 10px; } th { text-align: center; } th:first-child, td:first-child { text-align: left; } th:last-child, td:last-child { text-align: right; }
     .summary { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-    .terms { width: 55%; font-size: 14px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; } .terms strong { display: block; margin-bottom: 10px; text-decoration: underline; }
-    .totals { width: 40%; font-size: 14px; } .totals td { text-align: right; } .totals td:first-child { font-weight: 700; }
-    .signoff { margin-top: 70px; text-align: right; font-size: 15px; font-weight: 700; } .signoff p:first-child { margin: 0 0 50px; } .signoff p:last-child { margin: 0; }
+    .terms { width: 55%; font-size: 15px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; } .terms strong { display: block; margin-bottom: 10px; text-decoration: underline; }
+    .totals { width: 40%; font-size: 15px; } .totals td { text-align: right; } .totals td:first-child { font-weight: 700; }
+    .signoff { margin-top: 70px; text-align: right; font-size: 16px; font-weight: 700; } .signoff p:first-child { margin: 0 0 50px; } .signoff p:last-child { margin: 0; }
     .mobile-download { display: none; }
-    .mobile { height: auto; min-height: calc(100vh - 50px); flex-direction: column; }
-    .mobile .editor { flex: none; width: 100%; padding: 15px; overflow: visible; border-right: 0; border-bottom: 2px solid #94a3b8; box-shadow: none; }
+    .mobile { height: auto; min-height: calc(100vh - 82px); flex-direction: column; }
+    .mobile .editor { flex: none; width: 100%; padding: 18px 15px; overflow: visible; border-right: 0; border-bottom: 1px solid #d5e2df; box-shadow: none; }
     .mobile .field-row { flex-direction: column; gap: 0; }
     .mobile .preview-area { width: 100%; padding: 10px; align-items: flex-start; overflow: auto; }
     .mobile-download { display: block; position: sticky; top: 0; z-index: 2; width: calc(100vw - 20px); margin: 0 0 20px; box-shadow: 0 4px 6px #0002; }
