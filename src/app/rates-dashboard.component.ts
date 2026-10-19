@@ -65,6 +65,16 @@ import { Component } from '@angular/core';
     .note-icon { flex: 0 0 22px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: #e2e8f0; color: #334155; font-size: 13px; font-weight: 700; }
     .source-note p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.6; }
     .source-note strong { color: #334155; }
+    :host-context(.dark-theme) { background: #10191d; }
+    :host-context(.dark-theme) .dashboard { color: #dce6e6; }
+    :host-context(.dark-theme) .eyebrow, :host-context(.dark-theme) .category, :host-context(.dark-theme) .subtitle, :host-context(.dark-theme) .detail { color: #9aabad; }
+    :host-context(.dark-theme) .rate-card { border-color: #2a3b40; background: #182428; box-shadow: 0 8px 24px #0003; }
+    :host-context(.dark-theme) .rate-value { color: #edf4f2; }
+    :host-context(.dark-theme) .rate-value span { color: #a4b2b3; }
+    :host-context(.dark-theme) .source-note { border-color: #34464a; background: #1a282c; }
+    :host-context(.dark-theme) .source-note p { color: #aab8b9; }
+    :host-context(.dark-theme) .source-note strong { color: #dce6e6; }
+    :host-context(.dark-theme) .note-icon { background: #34464a; color: #dce6e6; }
     @media (max-width: 700px) { .dashboard { padding: 30px 16px; } .rate-grid { grid-template-columns: 1fr; } h2 { font-size: 27px; } .rate-card { padding: 23px; } .rate-value { font-size: 34px; } }
   `],
 })
