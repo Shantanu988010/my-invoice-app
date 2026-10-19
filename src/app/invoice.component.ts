@@ -102,6 +102,15 @@ interface InvoiceItem {
     .totals { width: 40%; font-size: 15px; } .totals td { text-align: right; } .totals td:first-child { font-weight: 700; }
     .signoff { margin-top: 70px; text-align: right; font-size: 16px; font-weight: 700; } .signoff p:first-child { margin: 0 0 50px; } .signoff p:last-child { margin: 0; }
     .mobile-download { display: none; }
+    :host-context(.dark-theme) .workspace { background: #111b1f; }
+    :host-context(.dark-theme) .editor { border-color: #2a3b40; background: #182428; box-shadow: 5px 0 20px #0003; }
+    :host-context(.dark-theme) h2, :host-context(.dark-theme) h3 { color: #e3eceb; }
+    :host-context(.dark-theme) label { color: #c3d0d0; }
+    :host-context(.dark-theme) input, :host-context(.dark-theme) textarea { border-color: #3a4d50; background: #111b1f; color: #e3eceb; color-scheme: dark; }
+    :host-context(.dark-theme) hr { border-top-color: #34464a; }
+    :host-context(.dark-theme) .item-card { border-color: #34464a; background: #1d2b2f; }
+    :host-context(.dark-theme) .preview-area { background: #111b1f; }
+    :host-context(.dark-theme) .mobile .editor { border-bottom-color: #34464a; }
     .mobile { height: auto; min-height: calc(100vh - 82px); flex-direction: column; }
     .mobile .editor { flex: none; width: 100%; padding: 18px 15px; overflow: visible; border-right: 0; border-bottom: 1px solid #d5e2df; box-shadow: none; }
     .mobile .field-row { flex-direction: column; gap: 0; }

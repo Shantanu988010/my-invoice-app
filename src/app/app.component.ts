@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { InvoiceComponent } from './invoice.component';
 import { RatesDashboardComponent } from './rates-dashboard.component';
+import { QuotationFromPhotoComponent } from './quotation-from-photo.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [InvoiceComponent, RatesDashboardComponent],
+  imports: [InvoiceComponent, RatesDashboardComponent, QuotationFromPhotoComponent],
   template: `
-    <div class="app-shell">
+    <div class="app-shell" [class.dark-theme]="isDarkMode">
       <header class="site-header">
         <button class="brand" (click)="page = 'landing'" aria-label="Go to home">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
@@ -17,6 +18,8 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
         <nav class="main-nav" aria-label="Main navigation">
           <button class="nav-link" [class.active]="page === 'landing'" (click)="page = 'landing'">Home</button>
           <button class="nav-link" [class.active]="page === 'rates'" (click)="page = 'rates'">Material rates</button>
+          <button class="nav-link" [class.active]="page === 'photo-quote'" (click)="page = 'photo-quote'">Photo to quote</button>
+          <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"><span aria-hidden="true">{{ isDarkMode ? '☀' : '☾' }}</span>{{ isDarkMode ? 'Light mode' : 'Dark mode' }}</button>
           <button class="nav-action" [class.active]="page === 'invoice'" (click)="page = 'invoice'"><span aria-hidden="true">＋</span> New invoice</button>
         </nav>
       </header>
@@ -67,6 +70,14 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
                   <button class="card-link" (click)="page = 'rates'">View material rates <span aria-hidden="true">→</span></button>
                 </article>
 
+                <article class="tool-card photo-card">
+                  <div class="tool-icon photo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5h3l1.5-2h7l1.5 2h3a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5h-16A1.5 1.5 0 0 1 3.5 18V8A1.5 1.5 0 0 1 5 6.5Z"/><circle cx="12" cy="12.5" r="3.5"/><path d="m8.5 17 2.2-2.2 1.8 1.8 1.2-1.2 2.3 2.1"/></svg></div>
+                  <div class="tool-tag">GEMINI AI</div>
+                  <h3>Photo to quotation</h3>
+                  <p>Turn a handwritten quotation into an editable document and client-ready PDF.</p>
+                  <button class="card-link" (click)="page = 'photo-quote'">Transcribe a quotation <span aria-hidden="true">→</span></button>
+                </article>
+
                 <article class="tool-card upcoming-card">
                   <div class="tool-icon history-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 8.5A8 8 0 1 1 4 13M4.5 4.75v3.8h3.8M12 7.5v5l3 1.75"/></svg></div>
                   <div class="tool-tag">COMING SOON</div>
@@ -81,6 +92,8 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
           </div>
         } @else if (page === 'invoice') {
           <app-invoice />
+        } @else if (page === 'photo-quote') {
+          <app-quotation-from-photo />
         } @else {
           <app-rates-dashboard />
         }
@@ -101,6 +114,9 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
     .main-nav { display: flex; align-items: center; gap: 10px; }
     .nav-link, .nav-action { min-height: 42px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: #687780; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; transition: color .15s, background .15s; }
     .nav-link:hover, .nav-link.active { color: #174e52; background: #e8f0ef; }
+    .theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 12px; border: 1px solid #dce5e4; border-radius: 8px; background: #fff; color: #43565d; cursor: pointer; font: inherit; font-size: 13px; font-weight: 650; transition: background .15s, border-color .15s, color .15s; }
+    .theme-toggle:hover { border-color: #80a9a4; color: #174e52; }
+    .theme-toggle span { color: #43827d; font-size: 17px; line-height: 1; }
     .nav-action { margin-left: 8px; padding: 0 17px; background: #173f45; color: #fff; box-shadow: 0 4px 10px #173f4520; }
     .nav-action:hover, .nav-action.active { background: #0d3036; }
     .nav-action span { padding-right: 4px; font-size: 17px; vertical-align: -1px; }
@@ -141,7 +157,7 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
     .section-eyebrow { margin-bottom: 8px; font-size: 11px; }
     .section-title h2 { margin: 0; color: #263844; font-family: var(--font-display); font-size: 27px; font-weight: 500; letter-spacing: -.03em; }
     .section-title > p { max-width: 290px; margin: 0 0 3px; color: #7b898e; font-size: 13px; line-height: 1.6; }
-    .tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+    .tool-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; }
     .tool-card { position: relative; display: flex; min-height: 228px; flex-direction: column; align-items: flex-start; padding: 21px 22px 18px; border: 1px solid #e3e9e8; border-radius: 11px; background: #fff; box-shadow: 0 5px 18px #1f363b08; transition: transform .16s, box-shadow .16s; }
     .tool-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px #1f363b12; }
     .tool-icon { display: grid; width: 37px; height: 37px; place-items: center; margin-bottom: 16px; border-radius: 9px; }
@@ -149,6 +165,7 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
     .invoice-icon { background: #e7f0ed; color: #347a73; }
     .rates-icon { background: #eef0f8; color: #5c6c9a; }
     .history-icon { background: #f5efe5; color: #a1804c; }
+    .photo-icon { background: #f3eaf7; color: #885c9a; }
     .tool-tag { margin-bottom: 7px; color: #829196; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
     .tool-card h3 { margin: 0; color: #293b45; font-family: var(--font-display); font-size: 19px; font-weight: 500; }
     .tool-card > p { margin: 8px 0 16px; color: #77868b; font-size: 14px; line-height: 1.6; }
@@ -159,11 +176,35 @@ import { RatesDashboardComponent } from './rates-dashboard.component';
     .coming-label { display: inline-flex; align-items: center; gap: 7px; margin-top: auto; color: #9a8a6e; font-size: 12px; font-weight: 600; }
     .coming-label span { width: 6px; height: 6px; border-radius: 50%; background: #c4a775; }
     .home-footer { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0 22px; border-top: 1px solid #e1e7e6; color: #89969a; font-size: 12px; }
-    @media (max-width: 900px) { .site-header { padding: 0 4%; } .home-page { padding-right: 4%; padding-left: 4%; } .hero-copy { padding: 42px 34px; } .hero h1 { font-size: 45px; } .tool-grid { gap: 10px; } .tool-card { padding: 18px; } }
-    @media (max-width: 680px) { .site-header { height: auto; min-height: 72px; flex-wrap: wrap; gap: 10px; padding: 12px 16px; } .brand-mark { width: 34px; height: 34px; } .brand-copy strong { font-size: 16px; } .main-nav { gap: 2px; } .nav-link, .nav-action { min-height: 38px; padding: 0 9px; font-size: 12px; } .nav-action { margin-left: 2px; } .home-page { padding: 12px 14px 0; } .hero { grid-template-columns: 1fr; } .hero-copy { padding: 36px 26px 28px; } .hero h1 { max-width: 480px; font-size: clamp(38px, 10vw, 48px); } .hero-description { font-size: 15px; } .hero-caption { margin-top: 25px; } .hero-art { min-height: 275px; } .window-illustration { width: 135px; } .art-topline { top: 17px; right: 18px; left: 18px; } .art-label { right: 18px; bottom: 18px; } .art-watermark { right: 20px; bottom: 38px; font-size: 42px; } .workspace-section { padding: 37px 0 24px; } .section-title { display: block; } .section-title h2 { font-size: 24px; } .section-title > p { margin-top: 8px; } .tool-grid { grid-template-columns: 1fr; gap: 10px; } .tool-card { min-height: 205px; } }
+    .dark-theme { color-scheme: dark; background: #10191d; color: #dce6e6; }
+    .dark-theme .site-header { background: #10191d; }
+    .dark-theme .brand, .dark-theme .hero h1, .dark-theme .section-title h2, .dark-theme .tool-card h3 { color: #e8f0ef; }
+    .dark-theme .brand-copy span, .dark-theme .nav-link, .dark-theme .section-title > p, .dark-theme .tool-card > p { color: #9aabad; }
+    .dark-theme .nav-link:hover, .dark-theme .nav-link.active { color: #8dd4cb; background: #203437; }
+    .dark-theme .theme-toggle { border-color: #34464a; background: #1a282c; color: #dce6e6; }
+    .dark-theme .theme-toggle:hover { border-color: #56847f; color: #a8e4dc; }
+    .dark-theme .hero, .dark-theme .tool-card { border-color: #2a3b40; background: #182428; box-shadow: 0 14px 42px #0003; }
+    .dark-theme .hero-description { color: #a6b4b5; }
+    .dark-theme .hero-caption, .dark-theme .tool-tag { color: #94a5a6; }
+    .dark-theme .hero-art { background: linear-gradient(145deg, #263b3c 0%, #1d3133 48%, #172a2d 100%); }
+    .dark-theme .art-topline, .dark-theme .art-label { color: #aac1bd; }
+    .dark-theme .upcoming-card { background: #1b2628; }
+    .dark-theme .home-footer { border-color: #2a3b40; color: #8e9e9f; }
+    .dark-theme .invoice-icon { background: #213c3b; color: #8dd4cb; }
+    .dark-theme .rates-icon { background: #2a3043; color: #b4bff0; }
+    .dark-theme .history-icon { background: #393328; color: #d8bb86; }
+    .dark-theme .photo-icon { background: #392d40; color: #d4a9e5; }
+    @media (max-width: 900px) { .site-header { padding: 0 4%; } .home-page { padding-right: 4%; padding-left: 4%; } .hero-copy { padding: 42px 34px; } .hero h1 { font-size: 45px; } .tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .tool-card { padding: 18px; } }
+    @media (max-width: 680px) { .site-header { height: auto; min-height: 72px; flex-wrap: wrap; gap: 10px; padding: 12px 16px; } .brand-mark { width: 34px; height: 34px; } .brand-copy strong { font-size: 16px; } .main-nav { flex-wrap: wrap; justify-content: flex-end; gap: 2px; } .nav-link, .nav-action, .theme-toggle { min-height: 38px; padding: 0 9px; font-size: 12px; } .nav-action { margin-left: 2px; } .home-page { padding: 12px 14px 0; } .hero { grid-template-columns: 1fr; } .hero-copy { padding: 36px 26px 28px; } .hero h1 { max-width: 480px; font-size: clamp(38px, 10vw, 48px); } .hero-description { font-size: 15px; } .hero-caption { margin-top: 25px; } .hero-art { min-height: 275px; } .window-illustration { width: 135px; } .art-topline { top: 17px; right: 18px; left: 18px; } .art-label { right: 18px; bottom: 18px; } .art-watermark { right: 20px; bottom: 38px; font-size: 42px; } .workspace-section { padding: 37px 0 24px; } .section-title { display: block; } .section-title h2 { font-size: 24px; } .section-title > p { margin-top: 8px; } .tool-grid { grid-template-columns: 1fr; gap: 10px; } .tool-card { min-height: 205px; } }
     @media (max-width: 390px) { .brand-copy span { font-size: 9px; } .main-nav { width: 100%; justify-content: space-between; } .nav-action { margin-left: 0; } .hero-actions { gap: 13px; } .primary-action { gap: 10px; } .home-footer { flex-direction: column; gap: 7px; } }
   `],
 })
 export class AppComponent {
-  page: 'landing' | 'invoice' | 'rates' = 'landing';
+  page: 'landing' | 'invoice' | 'rates' | 'photo-quote' = 'landing';
+  isDarkMode = localStorage.getItem('shantanu-theme') === 'dark';
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('shantanu-theme', this.isDarkMode ? 'dark' : 'light');
+  }
 }
